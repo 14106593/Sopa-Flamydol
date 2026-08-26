@@ -260,7 +260,8 @@
     <div class="leader">
       <h3>🏆 Top 5 mejores tiempos</h3>
       <ol id="leaderList"></ol>
-      <div class="note">Los tiempos guardados son visibles para todas las personas que jueguen esta sopa de letras.</div>
+      <div class="note">El ranking se guarda solo en este celular.</div>
+      <button id="resetLeaderBtn" class="btn-ghost" style="margin-top:10px;width:100%;font-size:12px;padding:9px;">Reiniciar ranking (nuevo grupo)</button>
     </div>
 
     <div class="footer-logo">
@@ -503,13 +504,13 @@ function newGame(){
   startTimer();
 }
 
-// ---- Leaderboard (persistent, shared) ----
+// ---- Leaderboard (por dispositivo, vía localStorage) ----
 const LB_KEY = 'flamydol-sopa-leaderboard-v2';
 
 async function loadLeaderboard(){
   try{
-    const res = await window.storage.get(LB_KEY, true);
-    return res ? JSON.parse(res.value) : [];
+    const raw = localStorage.getItem(LB_KEY);
+    return raw ? JSON.parse(raw) : [];
   }catch(err){
     return [];
   }
@@ -517,7 +518,7 @@ async function loadLeaderboard(){
 
 async function saveLeaderboard(list){
   try{
-    await window.storage.set(LB_KEY, JSON.stringify(list), true);
+    localStorage.setItem(LB_KEY, JSON.stringify(list));
   }catch(err){
     console.error('No se pudo guardar el ranking', err);
   }
@@ -560,6 +561,13 @@ document.getElementById('skipSave').addEventListener('click', ()=>{
 });
 
 document.getElementById('resetBtn').addEventListener('click', newGame);
+
+document.getElementById('resetLeaderBtn').addEventListener('click', async ()=>{
+  if(confirm('¿Borrar el Top 5 de este celular para empezar con un grupo nuevo?')){
+    await saveLeaderboard([]);
+    renderLeaderboard([]);
+  }
+});
 
 attachEvents();
 newGame();
